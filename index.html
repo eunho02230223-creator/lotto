@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>LOTTO 6/45 · FINAL PICK</title>
+<style>
+:root{--bg:#090b0e;--card:#11151a;--line:#252b33;--text:#f5f6f7;--muted:#9299a3;--gold:#d8b36a}
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;font-family:Inter,"Noto Sans KR",system-ui,sans-serif;background:radial-gradient(circle at 50% 12%,#1c2026 0,#0b0d10 48%,#070809 100%);color:var(--text)}
+main{min-height:100vh;display:grid;place-items:center;padding:24px}.card{width:min(900px,100%);text-align:center;background:rgba(17,21,26,.94);border:1px solid var(--line);border-radius:28px;padding:52px 26px 34px;box-shadow:0 35px 100px #0008}
+.eyebrow{font-size:12px;letter-spacing:.3em;color:var(--gold);font-weight:800}.round{font-size:clamp(32px,6vw,54px);letter-spacing:-.045em;margin:14px 0 6px}.sub{color:var(--muted);font-size:16px}
+.balls{display:flex;justify-content:center;gap:14px;flex-wrap:wrap;margin:42px auto 28px}.ball{width:82px;height:82px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(145deg,#fff,#d9dde2);color:#111;font-weight:850;font-size:24px;box-shadow:inset -8px -9px 15px #0002,inset 6px 6px 12px #fff,0 14px 30px #0005}
+.label{font-size:12px;letter-spacing:.22em;color:var(--muted)}.desc{margin-top:10px;color:#cbd0d7;font-size:15px}
+button{margin-top:30px;border:1px solid #3a414b;background:#eceef0;color:#11151a;border-radius:999px;padding:14px 25px;font-weight:800;cursor:pointer}button:hover{background:#fff}
+.status{margin:20px auto 0;max-width:760px;padding:12px 15px;border:1px solid var(--line);border-radius:12px;color:var(--muted);font-size:12px;line-height:1.6;white-space:pre-wrap}.error{border-color:#713b3b;color:#ffb6b6}
+.foot{margin-top:28px;color:#626a75;font-size:11px;line-height:1.7}
+@media(max-width:620px){.card{padding:42px 16px 28px}.ball{width:60px;height:60px;font-size:19px}.balls{gap:9px;margin-top:32px}}
+</style>
+</head>
+<body>
+<main><section class="card">
+<div class="eyebrow">LOTTO 6/45</div>
+<div class="round" id="round">FINAL PICK</div>
+<div class="sub">이번 회차 최종 추천</div>
+<div class="balls" id="balls"></div>
+<div class="label">FINAL AUTO PICK</div>
+<div class="desc">엑셀 통계분석 시스템이 선정한 최종 1순위 조합</div>
+<button id="reload">FINAL PICK 확인</button>
+<div class="status" id="status">최종 조합 데이터를 확인하는 중...</div>
+<div class="foot">번호는 원본 Excel의 <b>FINAL_자동발급</b> 1순위 결과에서 자동 생성된 데이터만 표시합니다.<br>웹페이지에서 번호를 새로 계산하거나 예측하지 않습니다.</div>
+</section></main>
+<script>
+const statusEl=document.getElementById("status");
+function status(t,error=false){statusEl.textContent=t;statusEl.className="status"+(error?" error":"");}
+async function load(){
+  status("최종 조합 데이터를 확인하는 중...");
+  document.getElementById("balls").innerHTML="";
+  try{
+    const r=await fetch("data/result.json?v="+Date.now(),{cache:"no-store"});
+    if(!r.ok) throw new Error("GitHub의 data/result.json을 불러오지 못했습니다.");
+    const d=await r.json();
+    if(!d.ok) throw new Error(d.error||"최종 데이터 생성에 실패했습니다.");
+    if(!Number.isInteger(d.nextRound)||d.nextRound<1) throw new Error("회차 데이터가 올바르지 않습니다.");
+    if(!Array.isArray(d.numbers)||d.numbers.length!==6) throw new Error("최종 조합이 정확히 6개가 아닙니다.");
+    if(d.numbers.some(n=>!Number.isInteger(n)||n<1||n>45)) throw new Error("번호가 1~45 범위를 벗어났습니다.");
+    if(new Set(d.numbers).size!==6) throw new Error("최종 조합에 중복 번호가 있습니다.");
+    document.getElementById("round").textContent=d.nextRound+"회 FINAL PICK";
+    document.getElementById("balls").innerHTML=d.numbers.map(n=>`<div class="ball">${String(n).padStart(2,"0")}</div>`).join("");
+    status("정상 확인 완료 · "+d.nextRound+"회 · "+d.numbers.join(" · "));
+  }catch(e){status("최종 조합 데이터를 불러올 수 없습니다.\n원인: "+e.message,true);}
+}
+document.getElementById("reload").onclick=load;load();
+</script>
+</body>
+</html>

@@ -1,0 +1,16 @@
+{
+  "ok": true,
+  "latestRound": 1236,
+  "nextRound": 1237,
+  "numbers": [
+    10,
+    27,
+    31,
+    33,
+    37,
+    42
+  ],
+  "sourceSheet": "FINAL_자동발급",
+  "rank": 1,
+  "validated": true
+}
